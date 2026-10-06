@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuadro Comparativo - 10 Lenguajes de Programación</title>
+    
+    <!-- Fuente moderna e iconos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Variables base */
+            --bg-color: #f3f4f6;
+            --surface-color: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --sidebar-bg: #111827;
+            --sidebar-text: #f9fafb;
+            
+            /* Variables dinámicas (cambian con JS) */
+            --primary-color: #3776ab; /* Por defecto Python */
+            --primary-light: rgba(55, 118, 171, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #app {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sidebar de navegación */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--sidebar-text);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-header span {
+            color: var(--primary-color);
+            transition: color 0.4s ease;
+        }
+
+        .nav-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-list::-webkit-scrollbar { width: 6px; }
+        .nav-list::-webkit-scrollbar-track { background: transparent; }
+        .nav-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            padding: 0.85rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: left;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn i {
+            font-size: 1.15rem;
+            width: 25px;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255,255,255,0.05);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary-light);
+            color: white;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .nav-btn.active i {
+            color: var(--primary-color);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2.5rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .content-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lang-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .lang-icon-large {
+            font-size: 4rem;
+            color: var(--primary-color);
+            background-color: var(--surface-color);
+            padding: 1.2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: all 0.4s ease;
+        }
+
+        .lang-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 0.3rem;
+        }
+        
+        .creator-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Estilos del Cuadro Comparativo (Tabla estructurada) */
+        .comparison-table-wrapper {
+            background-color: var(--surface-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border-top: 5px solid var(--primary-color);
+            transition: all 0.4s ease;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .comparison-table th {
+            width: 28%;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: none;
+        }
+        
+        /* Ajuste para que el display flex de los th no rompa la tabla en navegadores */
+        .comparison-table tr th {
+            display: table-cell;
+        }
+        .th-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-table td {
+            width: 72%;
+            font-size: 1.02rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover {
+            background-color: rgba(0,0,0,0.01);
+        }
+
+        .badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .feature-badge {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .code-tag {
+            font-family: monospace;
+            background: rgba(0,0,0,0.04);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            color: var(--text-main);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 900px) {
+            #app {
+                flex-direction: column;
+            }
+            body { overflow: auto; }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .nav-list {
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 1rem;
+            }
+
+            .nav-btn {
+                white-space: nowrap;
+                padding: 0.7rem 1rem;
+            }
+
+            .main-content {
+                padding: 1.5rem 1rem;
+                overflow-y: visible;
+            }
+
+            .lang-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .lang-icon-large {
+                font-size: 3rem;
+            }
+
+            .lang-title {
+                font-size: 2.2rem;
+            }
+
+            .comparison-table th, .comparison-table td {
+                display: block;
+                width: 100%;
+            }
+            
+            .comparison-table th {
+                border-bottom: none;
+                padding-bottom: 0.4rem;
+            }
+            
+            .comparison-table td {
+                padding-top: 0.2rem;
+                padding-bottom: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Cuadro<span>Comparativo</span></h1>
+            </div>
+            <nav class="nav-list" id="nav-list">
+                <!-- JavaScript inyectará los botones aquí -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-container" id="content-container">
+                <!-- JavaScript inyectará la tabla comparativa aquí -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const languages = [
+            {
+                id: 'python',
+                name: 'Python',
+                icon: 'fa-brands fa-python',
+                color: '#3776AB',
+                creator: 'Guido van Rossum (1991)',
+                nameChanges: 'Heredero conceptual de ABC. Se planteó llamarlo informalmente "Monty Python".',
+                history: 'Nació como sucesor del lenguaje ABC enfocado en la legibilidad y simplicidad del código.',
+                openSource: 'Sí (CPython). Recibe actualizaciones mayores anualmente (ej. Python 3.12, 3.13).',
+                translation: 'Interpretado (por CPython) y compilado a código intermedio (bytecode) antes de ejecutarse.',
+                symbols: '<span class="code-tag">#</span> (comentarios), <span class="code-tag">**</span> (exponente), <span class="code-tag">-></span> (tipos).',
+                features: ['Legibilidad extrema por su código limpio.', 'Líder en Inteligencia Artificial, Ciencia de Datos y automatización.'],
+                syntax: 'Basada estrictamente en indentación (espacios) en lugar de usar llaves {}. No requiere punto y coma.'
+            },
+            {
+                id: 'c',
+                name: 'C',
+                icon: 'fa-solid fa-c',
+                color: '#283593',
+                creator: 'Dennis Ritchie (1972)',
+                nameChanges: 'Evolucionó directamente del lenguaje B (de Ken Thompson) y este de BCPL.',
+                history: 'Creado en los Laboratorios Bell para reescribir el sistema operativo Unix. Base de la mayoría de lenguajes modernos.',
+                openSource: 'Sí (Proyectos GNU GCC, Clang). Actualizaciones esporádicas del estándar (ej. C17, C23).',
+                translation: 'Compilado directamente a código de máquina (binario nativo).',
+                symbols: '<span class="code-tag">*</span> (punteros), <span class="code-tag">&</span> (dirección de memoria), <span class="code-tag">;</span> (fin de sentencia).',
+                features: ['Comunicación directa y extremadamente rápida con el hardware.', 'Ideal para sistemas operativos, controladores y microcontroladores.'],
+                syntax: 'Procedural. Altamente manual, maneja punteros de memoria y exige gestión directa de los recursos.'
+            },
+            {
+                id: 'cpp',
+                name: 'C++',
+                icon: 'fa-solid fa-file-code',
+                color: '#00599C',
+                creator: 'Bjarne Stroustrup (1979)',
+                nameChanges: 'Llamado inicialmente "C con clases" (C with Classes) antes de renombrarse a C++ en 1983.',
+                history: 'Nació para unir la programación orientada a objetos con el alto rendimiento y control de C.',
+                openSource: 'Sí (GCC, Clang, LLVM). Se actualiza con un nuevo estándar cada 3 años (ej. C++20, C++23).',
+                translation: 'Compilado directamente a código binario nativo.',
+                symbols: '<span class="code-tag">::</span> (ámbito), <span class="code-tag"><<</span> / <span class="code-tag">>></span> (E/S), <span class="code-tag">-></span> (punteros).',
+                features: ['Alto rendimiento y control absoluto de los recursos.', 'Estándar en motores gráficos de videojuegos (Unreal Engine) y software pesado.'],
+                syntax: 'Sintaxis compleja y robusta con uso de clases, plantillas (templates) y control manual de memoria.'
+            },
+            {
+                id: 'java',
+                name: 'Java',
+                icon: 'fa-brands fa-java',
+                color: '#E76F00',
+                creator: 'James Gosling (1995)',
+                nameChanges: 'Se llamó inicialmente "Oak" (Roble), cambiado a Java por motivos de marca comercial.',
+                history: 'Diseñado en Sun Microsystems bajo la filosofía "Escribe una vez, ejecuta en cualquier lugar".',
+                openSource: 'Sí (OpenJDK). Ciclo de lanzamientos regulares de nuevas versiones cada 6 meses.',
+                translation: 'Compilado a bytecode y ejecutado por la Máquina Virtual de Java (JVM).',
+                symbols: '<span class="code-tag">@</span> (anotaciones), <span class="code-tag">.</span> (métodos/atributos), <span class="code-tag">[]</span> (arreglos).',
+                features: ['Alta estabilidad, seguridad nativa y excelente escalabilidad corporativa.', 'Utilizado en sistemas bancarios y desarrollo nativo de Android.'],
+                syntax: 'Estrictamente orientada a objetos. Exige declarar siempre clases, usar llaves y cerrar cada línea con punto y coma.'
+            },
+            {
+                id: 'csharp',
+                name: 'C# (C-Sharp)',
+                icon: 'fa-brands fa-microsoft',
+                color: '#68217A',
+                creator: 'Anders Hejlsberg (2000)',
+                nameChanges: 'Conocido internamente en sus inicios bajo el nombre código "Cool" (C-like Object Oriented Language).',
+                history: 'Desarrollado por Microsoft como base de la plataforma .NET para competir contra el dominio de Java.',
+                openSource: 'Sí (Plataforma .NET y compilador Roslyn). Lanzamientos y actualizaciones mayores anuales (ej. .NET 8).',
+                translation: 'Compilado a CIL (Common Intermediate Language) ejecutado por el CLR de .NET.',
+                symbols: '<span class="code-tag">=></span> (lambda), <span class="code-tag">??</span> (coalescencia nula), <span class="code-tag">?</span> (anulables).',
+                features: ['Integración perfecta con el ecosistema Windows y servicios en la nube.', 'Lenguaje principal para desarrollo empresarial y videojuegos con Unity.'],
+                syntax: 'Fuertemente tipada y estructurada. Combina la potencia de C++ con comodidades modernas y asincronismo.'
+            },
+            {
+                id: 'javascript',
+                name: 'JavaScript',
+                icon: 'fa-brands fa-js',
+                color: '#F0DB4F',
+                creator: 'Brendan Eich (1995)',
+                nameChanges: 'Llamado inicialmente "Mocha", luego "LiveScript", y renombrado como "JavaScript" por marketing.',
+                history: 'Creado en un tiempo récord de 10 días para añadir dinamismo al navegador Netscape.',
+                openSource: 'Sí (Motores V8 de Google, SpiderMonkey de Mozilla). El estándar ECMAScript se actualiza anualmente.',
+                translation: 'Interpretado y optimizado en tiempo de ejecución (JIT) en navegadores y servidores Node.js.',
+                symbols: '<span class="code-tag">===</span> (igualdad estricta), <span class="code-tag">=></span> (funciones flecha), <span class="code-tag">``</span> (template strings).',
+                features: ['El motor que da interactividad a toda la web moderna.', 'Permite desarrollo full-stack tanto en el cliente como en servidores (Node.js).'],
+                syntax: 'Uso constante de llaves {}, palabras reservadas flexibles (let, const) y tipado altamente dinámico.'
+            },
+            {
+                id: 'vb',
+                name: 'Visual Basic',
+                icon: 'fa-brands fa-windows',
+                color: '#00539C',
+                creator: 'Microsoft (1991)',
+                nameChanges: 'Evolucionó desde BASIC clásico hasta Visual Basic clásico, reestructurándose como Visual Basic .NET (VB.NET).',
+                history: 'Nació como un esfuerzo masivo para acercar la programación al usuario común mediante entornos gráficos (RAD).',
+                openSource: 'La plataforma moderna .NET a la que pertenece hoy, y su compilador, son totalmente Open Source.',
+                translation: 'Compilado al IL (Intermediate Language) de la plataforma .NET.',
+                symbols: '<span class="code-tag">=</span> (asignación/comparación), <span class="code-tag">&</span> (concatenación de texto).',
+                features: ['Facilidad visual de arrastrar y soltar componentes de interfaz.', 'Utilizado en automatización corporativa y macros (VBA).'],
+                syntax: 'Exageradamente descriptiva y muy similar al inglés hablado. Evita llaves matemáticas utilizando bloques como "If...Then".'
+            },
+            {
+                id: 'sql',
+                name: 'SQL',
+                icon: 'fa-solid fa-database',
+                color: '#00758F',
+                creator: 'D. Chamberlin y R. Boyce (1970s)',
+                nameChanges: 'Originalmente llamado <storng>SEQUEL</strong> (*Structured English Query Language*).',
+                history: 'Creado en IBM para manipular y recuperar datos en el primer modelo de bases de datos relacionales.',
+                openSource: 'Es un estándar universal, pero sus motores principales (PostgreSQL, MySQL, SQLite) son Open Source.',
+                translation: 'Procesado e interpretado por los Sistemas de Gestión de Bases de Datos (SGBD).',
+                symbols: '<span class="code-tag">*</span> (todo), <span class="code-tag">%</span> (comodín), <span class="code-tag">;</span> (fin de consulta).',
+                features: ['Gestión exclusiva y estructurada de la información relacional.', 'Permite realizar consultas analíticas complejas de forma eficiente.'],
+                syntax: 'Puramente declarativa. Se escriben instrucciones lógicas usando palabras clave en mayúsculas como SELECT, FROM o WHERE.'
+            },
+            {
+                id: 'r',
+                name: 'R',
+                icon: 'fa-brands fa-r-project',
+                color: '#276DC3',
+                creator: 'Ross Ihaka y Robert Gentleman (1993)',
+                nameChanges: 'Nombrado "R" combinando las iniciales de sus creadores, basándose en el lenguaje estadístico previo "S".',
+                history: 'Creado en la Universidad de Auckland como un entorno libre para la investigación matemática y estadística.',
+                openSource: 'Sí (GNU GPL). Mantenido sin fines de lucro por el R Core Team junto a una masiva comunidad científica.',
+                translation: 'Interpretado mediante el entorno de ejecución oficial de R.',
+                symbols: '<span class="code-tag"><-</span> (asignación), <span class="code-tag">$</span> (componentes), <span class="code-tag">%*%</span> (matrices).',
+                features: ['Análisis estadístico matemáticamente riguroso y minería de datos.', 'Líder en ciencia de datos, bioinformática y gráficos complejos.'],
+                syntax: 'Lenguaje altamente funcional y vectorizado que utiliza una flecha (<span class="code-tag"><-</span>) como operador principal.'
+            },
+            {
+                id: 'rust',
+                name: 'Rust',
+                icon: 'fa-brands fa-rust',
+                color: '#B7410E',
+                creator: 'Graydon Hoare y Mozilla (2006)',
+                nameChanges: 'Nombrado por su creador en honor a los hongos *rust* (royas), sistemas distribuidos resilientes en la naturaleza.',
+                history: 'Surgió como un proyecto en Mozilla para corregir los graves fallos de seguridad y caídas de memoria de C/C++.',
+                openSource: 'Sí. Respaldado por grandes de la tecnología y gestionado de manera abierta por la Fundación Rust.',
+                translation: 'Compilado directamente a código de máquina nativo optimizado mediante infraestructura LLVM.',
+                symbols: '<span class="code-tag">!</span> (macros), <span class="code-tag">&</span> (referencias), <span class="code-tag">::</span> (módulos).',
+                features: ['Garantiza seguridad de memoria estricta sin sacrificar rendimiento.', 'Elegido para sistemas operativos, WebAssembly e infraestructura crítica.'],
+                syntax: 'Similitud superficial con C++ por sus llaves, pero integra un sistema estricto de "Propiedad" (Ownership) evaluado en compilación.'
+            }
+        ];
+
+        const navList = document.getElementById('nav-list');
+        const contentContainer = document.getElementById('content-container');
+
+        function hexToRgbA(hex, alpha){
+            let c;
+            if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+                c = hex.substring(1).split('');
+                if(c.length === 3){
+                    c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+                }
+                c = '0x' + c.join('');
+                return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+','+alpha+')';
+            }
+            return `rgba(0,0,0,${alpha})`;
+        }
+
+        function initNav() {
+            languages.forEach(lang => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.dataset.id = lang.id;
+                btn.innerHTML = `<i class="${lang.icon}"></i> ${lang.name}`;
+                
+                btn.addEventListener('click', () => selectLanguage(lang.id));
+                navList.appendChild(btn);
+            });
+        }
+
+        function selectLanguage(id) {
+            const lang = languages.find(l => l.id === id);
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.id === id) btn.classList.add('active');
+            });
+
+            document.documentElement.style.setProperty('--primary-color', lang.color);
+            document.documentElement.style.setProperty('--primary-light', hexToRgbA(lang.color, 0.15));
+
+            contentContainer.style.animation = 'none';
+            contentContainer.offsetHeight; 
+            contentContainer.style.animation = 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+
+            renderContent(lang);
+        }
+
+        function renderContent(lang) {
+            const featuresHTML = lang.features.map(f => `<span class="feature-badge">${f}</span>`).join(' ');
+
+            contentContainer.innerHTML = `
+                <div class="lang-header">
+                    <i class="${lang.icon} lang-icon-large"></i>
+                    <div>
+                        <h2 class="lang-title">${lang.name}</h2>
+                        <p class="creator-subtitle"><i class="fa-solid fa-user-pen"></i> Creador: ${lang.creator}</p>
+                    </div>
+                </div>
+
+                <div class="comparison-table-wrapper">
+                    <table class="comparison-table">
+                        <tr>
+                            <th><div class="th-content"><i class="fa-solid fa-clock-rotate-left"></i> Historia</div></th>
+                            <td>${lang.history}</td>
+                        </tr>
+                        <tr>
+                            <th><div class="th-content"><i class="fa-solid fa-signature"></i> Cambios de Nombre</div></th>
+                            <td>${lang.nameChanges}</td>
+                        </tr>
+                        <tr>
+                            <th><div class="th-content"><i class="fa-solid fa-star"></i> Características</div></th>
+                            <td><div class="badge-list">${featuresHTML}</div></td>
+                        </tr>
+                        <tr>
+                            <th><div class="th-content"><i class="fa-solid fa-code-branch"></i> Open Source & Versiones</div></th>
+                            <td>${lang.openSource}</td>
+                        </tr>
+                        <tr>
+                            <th><div class="th-content"><i class="fa-solid fa-language"></i> Traducción del Código</div></th>
+                            <td>${lang.translation}</td>
+                        </tr>
+                        <tr>
+                            <th><div class="th-content"><i class="fa-solid fa-icons"></i> Símbolos Principales</div></th>
+                            <td>${lang.symbols}</td>
+                        </tr>
+                        <tr>
+                            <th><div class="th-content"><i class="fa-solid fa-align-left"></i> Sintaxis General</div></th>
+                            <td>${lang.syntax}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initNav();
+            selectLanguage('python'); 
+        });
+    </script>
+</body>
+</html>
